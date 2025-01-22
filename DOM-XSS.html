@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DOM XSS Examples</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>DOM XSS - By 0ff3ns!v3 S3cur!ty</h1>
+
+    <h2>Exemplo com document.write()</h2>
+    <p>Selecione a linguagem:</p>
+    <select>
+        <script>
+            var urlParams = new URLSearchParams(window.location.search);
+            var defaultParam = urlParams.get('default');
+            if (defaultParam) {
+                document.write("<OPTION value=1>" + decodeURIComponent(defaultParam) + "</OPTION>");
+            }
+            document.write("<OPTION value=2>Portugues</OPTION>");
+        </script>
+    </select>
+    <p>Demostração do ataque de XSS baseado em DOM - Exemplo de execução ao lado: <code>?default=&lt;script&gt;alert('XSS')&lt;/script&gt;</code> to the URL.</p>
+
+    <h2>Exemplo com document.writeln()</h2>
+    <div id="output1"></div>
+    <script>
+        var msg1Param = urlParams.get('msg1');
+        if (msg1Param) {
+            document.writeln("<p>" + decodeURIComponent(msg1Param) + "</p>");
+        }
+    </script>
+    <p>Demostração do ataque de XSS baseado em DOM - Exemplo de execução ao lado: <code>?msg1=&lt;script&gt;alert('XSS')&lt;/script&gt;</code> to the URL.</p>
+
+
+##
+    <h2>DOM XSS Example - innerHTML</h1>
+
+    <div id="output2"></div>
+    <script>
+        // Função para verificar e executar o XSS
+        function executeXSS() {
+            // Verifica se o elemento 'output2' está presente na página
+            var outputElement = document.getElementById('output2');
+            if (!outputElement) {
+                console.error("Elemento 'output2' não encontrado na página.");
+                return;
+            }
+
+            // Verifica se o parâmetro 'content' está presente na URL
+            var urlParams = new URLSearchParams(window.location.search);
+            var contentParam = urlParams.get('content');
+
+            // Se 'content' estiver presente, insira-o usando innerHTML
+            if (contentParam) {
+                // Crie um novo elemento div
+                var div = document.createElement('div');
+                // Defina o conteúdo do div com o valor do parâmetro 'content'
+                div.innerHTML = contentParam;
+                // Insira o elemento div na página
+                outputElement.appendChild(div);
+
+                // Encontrar e executar scripts no conteúdo inserido
+                var scripts = div.getElementsByTagName('script');
+                for (var i = 0; i < scripts.length; i++) {
+                    var script = document.createElement('script');
+                    script.text = scripts[i].innerText;
+                    document.head.appendChild(script).parentNode.removeChild(script);
+                }
+            }
+        }
+
+        // Chama a função para executar o XSS quando a página terminar de carregar
+        window.addEventListener('load', executeXSS);
+    </script>
+
+
+
+    <p>DemostraÃ§Ã£o do ataque de XSS baseado em DOM - Exemplo de execuÃ§Ã£o ao lado: <code>?content=&lt;script&gt;alert('XSS')&lt;/script&gt;</code> na URL.</p>
+
+#
+    <h2>Exemplo com outerHTML</h2>
+    <div id="output3"></div>
+#
+    <script>
+        // Função para verificar e executar o XSS
+        function executeXSS() {
+            // Verifica se o elemento 'output' está presente na página
+            var outputElement = document.getElementById('output');
+            if (!outputElement) {
+                console.error("Elemento 'output' não encontrado na página.");
+                return;
+            }
+
+            // Verifica se o parâmetro 'content' está presente na URL
+            var urlParams = new URLSearchParams(window.location.search);
+            var contentParam = urlParams.get('content');
+
+            // Se 'content' estiver presente, insira-o usando outerHTML
+            if (contentParam) {
+                // Crie um novo elemento div
+                var div = document.createElement('div');
+                // Defina o conteúdo do div com o valor do parâmetro 'content'
+                div.innerHTML = contentParam;
+                // Substitua o elemento output pelo novo div
+                outputElement.outerHTML = div.outerHTML;
+
+                // Encontrar e executar scripts no conteúdo inserido
+                var scripts = div.getElementsByTagName('script');
+                for (var i = 0; i < scripts.length; i++) {
+                    var script = document.createElement('script');
+                    script.text = scripts[i].innerText;
+                    document.head.appendChild(script).parentNode.removeChild(script);
+                }
+            }
+        }
+
+        // Chama a função para executar o XSS quando a página terminar de carregar
+        window.addEventListener('load', executeXSS);
+    </script>
+
+    <p>Demostração do ataque de XSS baseado em DOM - Exemplo de execução ao lado: <code>?html=&lt;script&gt;alert('XSS')&lt;/script&gt;</code> to the URL.</p>
+
+    <script>
+        var htmlParam = urlParams.get('html');
+        if (htmlParam) {
+            document.getElementById('output3').outerHTML = decodeURIComponent(htmlParam);
+        }
+    </script>
+    <p>Demostração do ataque de XSS baseado em DOM - Exemplo de execução ao lado: <code>?html=&lt;script&gt;alert('XSS')&lt;/script&gt;</code> to the URL.</p>
+
+
+#
+    <h2>Exemplo com insertAdjacentHTML</h2>
+    <div id="output4"></div>
+    <script>
+        var msg2Param = urlParams.get('msg2');
+        if (msg2Param) {
+            document.getElementById('output4').insertAdjacentHTML('beforeend', decodeURIComponent(msg2Param));
+        }
+    </script>
+    <p>Demostração do ataque de XSS baseado em DOM - Exemplo de execução ao lado: <code>?msg2=&lt;script&gt;alert('XSS')&lt;/script&gt;</code> to the URL.</p>
+
+
+
+
+
+
+
+#
+    <h2>Exemplo com onevent</h2>
+    <button id="myButton">Clique aqui</button>
+    <script>
+        var onclickParam = urlParams.get('onclick');
+        if (onclickParam) {
+            document.getElementById('myButton').setAttribute("onclick", decodeURIComponent(onclickParam));
+        }
+    </script>
+    <p>Demostração do ataque de XSS baseado em DOM - Exemplo de execução ao lado: <code>?onclick=alert('XSS')</code> to the URL e depois clique no botão.</p>
+
+    <h2>Exemplos com funções de biblioteca jQuery</h2>
+
+    <div id="lib-example1"></div>
+    <script>
+        var addParam = urlParams.get('add');
+        if (addParam) {
+            $("#lib-example1").add(decodeURIComponent(addParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .add(): <code>?add=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example2"></div>
+    <script>
+        var afterParam = urlParams.get('after');
+        if (afterParam) {
+            $("#lib-example2").after(decodeURIComponent(afterParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .after(): <code>?after=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example3"></div>
+    <script>
+        var appendParam = urlParams.get('append');
+        if (appendParam) {
+            $("#lib-example3").append(decodeURIComponent(appendParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .append(): <code>?append=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example4"></div>
+    <script>
+        var animateParam = urlParams.get('animate');
+        if (animateParam) {
+            $("#lib-example4").animate({}, decodeURIComponent(animateParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .animate(): <code>?animate=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example5"></div>
+    <script>
+        var insertAfterParam = urlParams.get('insertAfter');
+        if (insertAfterParam) {
+            $("#lib-example5").insertAfter(decodeURIComponent(insertAfterParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .insertAfter(): <code>?insertAfter=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example6"></div>
+    <script>
+        var insertBeforeParam = urlParams.get('insertBefore');
+        if (insertBeforeParam) {
+            $("#lib-example6").insertBefore(decodeURIComponent(insertBeforeParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .insertBefore(): <code>?insertBefore=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example7"></div>
+    <script>
+        var beforeParam = urlParams.get('before');
+        if (beforeParam) {
+            $("#lib-example7").before(decodeURIComponent(beforeParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .before(): <code>?before=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example8"></div>
+    <script>
+        var htmlParam2 = urlParams.get('html2');
+        if (htmlParam2) {
+            $("#lib-example8").html(decodeURIComponent(htmlParam2));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .html(): <code>?html2=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example9"></div>
+    <script>
+        var prependParam = urlParams.get('prepend');
+        if (prependParam) {
+            $("#lib-example9").prepend(decodeURIComponent(prependParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .prepend(): <code>?prepend=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example10"></div>
+    <script>
+        var replaceAllParam = urlParams.get('replaceAll');
+        if (replaceAllParam) {
+            $(decodeURIComponent(replaceAllParam)).replaceAll("#lib-example10");
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .replaceAll(): <code>?replaceAll=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example11"></div>
+    <script>
+        var replaceWithParam = urlParams.get('replaceWith');
+        if (replaceWithParam) {
+            $("#lib-example11").replaceWith(decodeURIComponent(replaceWithParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .replaceWith(): <code>?replaceWith=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example12"></div>
+    <script>
+        var wrapParam = urlParams.get('wrap');
+        if (wrapParam) {
+            $("#lib-example12").wrap(decodeURIComponent(wrapParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .wrap(): <code>?wrap=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example13"></div>
+    <script>
+        var wrapInnerParam = urlParams.get('wrapInner');
+        if (wrapInnerParam) {
+            $("#lib-example13").wrapInner(decodeURIComponent(wrapInnerParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .wrapInner(): <code>?wrapInner=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example14"></div>
+    <script>
+        var wrapAllParam = urlParams.get('wrapAll');
+        if (wrapAllParam) {
+            $("#lib-example14").wrapAll(decodeURIComponent(wrapAllParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .wrapAll(): <code>?wrapAll=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example15"></div>
+    <script>
+        var hasParam = urlParams.get('has');
+        if (hasParam) {
+            $("#lib-example15").has(decodeURIComponent(hasParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .has(): <code>?has=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example16"></div>
+    <script>
+        var constructorParam = urlParams.get('constructor');
+        if (constructorParam) {
+            $("#lib-example16").prop("constructor", decodeURIComponent(constructorParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .constructor(): <code>?constructor=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example17"></div>
+    <script>
+        var initParam = urlParams.get('init');
+        if (initParam) {
+            $("#lib-example17").prop("init", decodeURIComponent(initParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .init(): <code>?init=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example18"></div>
+    <script>
+        var indexParam = urlParams.get('index');
+        if (indexParam) {
+            $("#lib-example18").prop("index", decodeURIComponent(indexParam));
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery .index(): <code>?index=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example19"></div>
+    <script>
+        var parseHTMLParam = urlParams.get('parseHTML');
+        if (parseHTMLParam) {
+            var parsedHTML = jQuery.parseHTML(decodeURIComponent(parseHTMLParam));
+            $("#lib-example19").append(parsedHTML);
+        }
+    </script>
+    <p>Exemplo de XSS com jQuery.parseHTML(): <code>?parseHTML=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+    <div id="lib-example20"></div>
+    <script>
+        var parseHTML2Param = urlParams.get('parseHTML2');
+        if (parseHTML2Param) {
+            var parsedHTML2 = $.parseHTML(decodeURIComponent(parseHTML2Param));
+            $("#lib-example20").append(parsedHTML2);
+        }
+    </script>
+    <p>Exemplo de XSS com $.parseHTML(): <code>?parseHTML2=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+
+</body>
+</html>
